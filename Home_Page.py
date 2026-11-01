@@ -15,7 +15,6 @@ Project_1 = st.Page(
 )
 
         
-st.logo("images/company_logo.png", size="large")        
 ## Navigation
 pg = st.navigation(pages= [Register, Project_1] )
 pg.run()

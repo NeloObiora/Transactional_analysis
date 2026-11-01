@@ -7,7 +7,7 @@ import seaborn as sns
 import plotly.express as px
 
 # DATASET
-https://drive.google.com/file/d/1uM8BXKPFn2CzLL2qkEFFK3v_UPHgeUQR/view?usp=sharing        
+# https://drive.google.com/file/d/1uM8BXKPFn2CzLL2qkEFFK3v_UPHgeUQR/view?usp=sharing        
  
 # functions
 def Seperator(inv_no):
@@ -153,13 +153,23 @@ def dashboard_creation(sales_df, expense_df):
 
 st.title("📈 Analysis")
 
+def get_upload_password():
+    try:
+        return st.secrets["upload_password"]
+    except Exception:
+        return None
+
+APP_PASSWORD = get_upload_password()
+
 user_dept = st.session_state.get('user_dept')
 if user_dept == "Accounting":
     password = st.text_input("Enter Password", type="password")
     login = st.button("Login")
-    if password == '':
+    if APP_PASSWORD is None:
+        st.error("Upload password is not configured. See the README.")
+    elif password == '':
         st.info("Please enter your password")
-    elif password == "KHEMSAFE":
+    elif password == APP_PASSWORD:
         st.success("Access Granted")
 
         uploaded_file = st.file_uploader(

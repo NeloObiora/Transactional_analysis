@@ -102,6 +102,29 @@ def expense_cleaning(df):
     st.session_state['expense_data'] = expense_df
     return(expense_df)
 
+def show_public_view():
+    try:
+        conn = sqlite3.connect("finance_data.db")
+        sale_data = pd.read_sql("SELECT * FROM cleaned_SalesDF", conn)
+        expenses_data = pd.read_sql("SELECT * FROM cleaned_ExpenseDF", conn)
+        conn.close()
+        st.subheader("Sales Data")
+        st.dataframe(sale_data)
+        st.subheader("Expenses Data")
+        st.dataframe(expenses_data)
+        
+        if sale_data.empty or expenses_data.empty:
+            st.warning("⚠️ No records found. Please contact Accounting.")
+
+        # ✔ Convert DATE after SQL read (CORRECTION)
+        sale_data['DATE'] = pd.to_datetime(sale_data['DATE'])
+        expenses_data['DATE'] = pd.to_datetime(expenses_data['DATE'])
+
+        dashboard_creation(sale_data, expenses_data)
+       
+    except sqlite3.OperationalError:
+        st.error("⚠️ Database not found. Ask Accounting to upload records.")    
+        st.info("The system needs at least one successful upload to create the database files.")
 
 def dashboard_creation(sales_df, expense_df):
     st.title("📊 Dashboard")
@@ -164,11 +187,8 @@ APP_PASSWORD = get_upload_password()
 user_dept = st.session_state.get('user_dept')
 if user_dept == "Accounting":
     password = st.text_input("Enter Password", type="password")
-    login = st.button("Login")
     if APP_PASSWORD is None:
-        st.error("Upload password is not configured. See the README.")
-    elif password == '':
-        st.info("Please enter your password")
+        st.error("Upload password is not configured.")
     elif password == APP_PASSWORD:
         st.success("Access Granted")
 
@@ -184,7 +204,7 @@ if user_dept == "Accounting":
                 st.write("Excel file uploaded")
                 df = pd.read_excel(uploaded_file)
             st.session_state["df"] = df
-            
+    
 # Data cleaning
             show_basic_info(df)
             show_missing_values(df)
@@ -198,31 +218,13 @@ if user_dept == "Accounting":
             conn.close()
             dashboard_creation(cleaned_SalesDF, cleaned_ExpenseDF)
     else:
-        st.info("Access Denied!!")
+        if password != '':
+            st.warning("Wrong password. Showing the public view.")
+            show_public_view()
         
 else:
-    try:
-        conn = sqlite3.connect("finance_data.db")
-        sale_data = pd.read_sql("SELECT * FROM cleaned_SalesDF", conn)
-        expenses_data = pd.read_sql("SELECT * FROM cleaned_ExpenseDF", conn)
-        conn.close()
-        st.subheader("Sales Data")
-        st.dataframe(sale_data)
-        st.subheader("Expenses Data")
-        st.dataframe(expenses_data)
+    show_public_view()
         
-        if sale_data.empty or expenses_data.empty:
-            st.warning("⚠️ No records found. Please contact Accounting.")
-
-        # ✔ Convert DATE after SQL read (CORRECTION)
-        sale_data['DATE'] = pd.to_datetime(sale_data['DATE'])
-        expenses_data['DATE'] = pd.to_datetime(expenses_data['DATE'])
-
-        dashboard_creation(sale_data, expenses_data)
-       
-    except sqlite3.OperationalError:
-        st.error("⚠️ Database not found. Ask Accounting to upload records.")    
-        st.info("The system needs at least one successful upload to create the database files.")
   
   
  

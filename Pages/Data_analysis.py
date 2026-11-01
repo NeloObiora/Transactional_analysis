@@ -5,9 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
-
-# DATASET
-# https://drive.google.com/file/d/1uM8BXKPFn2CzLL2qkEFFK3v_UPHgeUQR/view?usp=sharing        
+        
  
 # functions
 def Seperator(inv_no):
